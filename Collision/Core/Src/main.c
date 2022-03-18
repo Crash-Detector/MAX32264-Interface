@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stdio.h"
+#include <sys/mman.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -116,6 +117,11 @@ int main(void)
   FILE *ptr;
 
   ptr = fopen("algorithm.msbl","rb");  // r for read, b for binary
+  if ( ptr == NULL )
+      {
+      fprintf( stderr, "Failed to open algorithm file. %s\n", strerror( errno ) );
+      exit( 1 );
+      } // end if
   uint8_t byteF[254449];
   fread(byteF,sizeof(byteF),1,ptr); // read 213408 bytes to our buffer
 

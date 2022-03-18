@@ -37,6 +37,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+enum IO { IN, OUT };
 
 /* USER CODE END ET */
 
@@ -52,6 +53,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
+void config_gpio( const char port, const int pin_num, const IO direction );
 
 /* USER CODE BEGIN EFP */
 
