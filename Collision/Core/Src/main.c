@@ -19,13 +19,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stdio.h"
-#include <sys/mman.h>
 
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-	#include "stdio.h"
+#include "stdio.h"
+//#include <sys/mman.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -153,10 +152,10 @@ int main(void)
   fread(&byteF,sizeof(byteF),1,ptr); // read 213408 bytes to our buffer
 
   for( int i = 0; i < 0x45; ++i){
-	  printf("%x ", byteF[i]);
-	  if(i%15){
-		  printf("\n");
-	  }
+      printf("%x ", byteF[i]);
+      if(i%15){
+          printf("\n");
+      }
   }*/
 
 
@@ -182,7 +181,7 @@ int main(void)
   HAL_Delay(2);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
   if(buf[0] != 0x00 || ret != HAL_OK ){
-    	  printf("Error setting page num: code %x\n", buf[0]);
+          printf("Error setting page num: code %x\n", buf[0]);
    }
 
   /*initialization vector*/
@@ -190,59 +189,59 @@ int main(void)
   buf[0] = 0x80;
   buf[1] = 0x00;
   for(int i = 0; i < byte_count; ++i){
-	  buf[2+i] = byteF[0x28+i];
+      buf[2+i] = byteF[0x28+i];
   }
   ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
   HAL_Delay(2);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
   if(buf[0] != 0x00 || ret != HAL_OK ){
-      	  printf("Error setting page num: code %x\n", buf[0]);
+          printf("Error setting page num: code %x\n", buf[0]);
    }
 /*authentication bytes*/
   byte_count = 0x43-0x34;
-	buf[0] = 0x80;
-	buf[1] = 0x01;
-	for(int i = 0; i < byte_count; ++i){
-	  buf[2+i] = byteF[0x34+i];
-	}
-	ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
-	HAL_Delay(2);
-	ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-	if(buf[0] != 0x00 || ret != HAL_OK ){
-			  printf("Error setting page num: code %x\n", buf[0]);
-	   }
+    buf[0] = 0x80;
+    buf[1] = 0x01;
+    for(int i = 0; i < byte_count; ++i){
+      buf[2+i] = byteF[0x34+i];
+    }
+    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
+    HAL_Delay(2);
+    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+    if(buf[0] != 0x00 || ret != HAL_OK ){
+              printf("Error setting page num: code %x\n", buf[0]);
+       }
 
-	/*erase application*/
+    /*erase application*/
 
-	buf[0] = 0x80;
-	buf[1] = 0x03;
-	ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-	HAL_Delay(1400);
-	ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-	if(buf[0] != 0x00 || ret != HAL_OK ){
-			  printf("Error setting page num: code %x\n", buf[0]);
-	   }
-	int current = 0x4c;
-	for(int i = 0; i < page_count; ++i){
-		int count = 2;
-		buf[0] = 0x8;
-		buf[1] = 0x04;
-		for(int j = current; j < (current + page_size); ++j){
-			buf[count] = byteF[j];
-			++count;
-		}
-		current = current + page_size;
+    buf[0] = 0x80;
+    buf[1] = 0x03;
+    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+    HAL_Delay(1400);
+    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+    if(buf[0] != 0x00 || ret != HAL_OK ){
+              printf("Error setting page num: code %x\n", buf[0]);
+       }
+    int current = 0x4c;
+    for(int i = 0; i < page_count; ++i){
+        int count = 2;
+        buf[0] = 0x8;
+        buf[1] = 0x04;
+        for(int j = current; j < (current + page_size); ++j){
+            buf[count] = byteF[j];
+            ++count;
+        }
+        current = current + page_size;
 
-		ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + page_size, 5000);
-		HAL_Delay(340);
-		ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-		if(buf[0] != 0x00 || ret != HAL_OK ){
-					  printf("Error setting page %d : code %x\n", i, buf[0]);
-			   }
+        ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + page_size, 5000);
+        HAL_Delay(340);
+        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+        if(buf[0] != 0x00 || ret != HAL_OK ){
+                      printf("Error setting page %d : code %x\n", i, buf[0]);
+               }
 
 
 
-	}
+    }
 
 
 
@@ -287,7 +286,7 @@ int main(void)
   HAL_Delay(2);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
   if(buf[0] != 0x00 || ret != HAL_OK ){
-	  printf("Error setting mode: code %x\n", buf[0]);
+      printf("Error setting mode: code %x\n", buf[0]);
   }
 
   /*Set FIFO threshold as almost full at 0x0F*/
@@ -298,7 +297,7 @@ int main(void)
   HAL_Delay(2);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
     if(buf[0] != 0x00 || ret != HAL_OK ){
-  	  printf("Error setting FIFO threshold code: %x\n", buf[0]);
+      printf("Error setting FIFO threshold code: %x\n", buf[0]);
     }
 
 
@@ -310,10 +309,8 @@ int main(void)
   HAL_Delay(40);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
     if(buf[0] != 0x00 || ret != HAL_OK ){
-  	  printf("Error enabling sensor code: %x\n", buf[0]);
+      printf("Error enabling sensor code: %x\n", buf[0]);
     }
-
-
   /*Enable the algorithm*/
   buf[0] = 0x52;
   buf[1] = 0x02;
@@ -322,7 +319,7 @@ int main(void)
   HAL_Delay(40);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
     if(buf[0] != 0x00 || ret != HAL_OK ){
-  	  printf("Error Enabling Algorithm code: %x\n", buf[0]);
+      printf("Error Enabling Algorithm code: %x\n", buf[0]);
     }
 
 
@@ -333,93 +330,85 @@ int main(void)
 
   while (1)
       {
-	    HAL_Delay(1000);
-	    int error = 0;
-	    /*read sensor hub status*/
-	    buf[0] = 0x00;
-	    buf[1] = 0x00;
-	    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-	    if ( ret != HAL_OK ) {
-	        printf("Error sensor write\r\n");
-	        error = 1;
-	        continue;
-	    } else 
-          {
-	      	ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
-	      	if(buf[1] != 0x08)
-              {
-	      	    printf("Data bit not ready %x \n", buf[2]);
-	      	    continue;
-	      	    } // end if
-	      	else if(buf[0] != 0x0)
-              {
-			        printf(" %x error \n", buf[1]);
-					    continue;
-				      } // end if
-	  	  	/*read FIFO hub status*/
-	  	  	buf[0] = 0x12;
-	  	  	buf[1] = 0x00;
-	  	  	ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-	  	  	if ( ret != HAL_OK ) {
-	  	  	    printf("Error algorithm write\r\n");
-	  	  	    error = 1;
-	  	  	    continue;
-	  	  	} else // Was able to write.
-              {
-	  	  	    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
-	  	  	    int sample_size = buf[1];
-	  	  	    if(buf[0] != 0x0)
-                  {
-	  	  	        printf(" %x error \n", buf[1]);
-	  	  	        continue;
-	  	  	        } // end if
-	  	  	    /* read the data */
-					    buf[0] = 0x12;
-					    buf[1] = 0x01;
-					    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-					    ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000);
-				      if ( ret != HAL_OK ) 
-                  {
-				          printf("Error algorithm read\r\n");
-								  error = 1;
-								  continue;
-								  } 
-              else 
-                  {
-
-								  int length_of_data = 1 + 18*sample_size;
-								  ret = HAL_I2C_Master_Read(&hi2c1, Read_HM, &buf[0],length_of_data, 5000);
-								  //ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000); //checks status
-								  if(buf[0] != 0x0)
-                      {
-								  	  printf(" %x error \n", buf[1]);
-								  	  continue;
-								  	  } // end if
-								  /*this gets us our data for heart_rate and SpO2*/
-								  float viable = 0.0; //counts how many viable samples we have
-								  for(int i = 13; i < length_of_data; i = i + 18)
-                      {
-								  		int temp_heart = (buf[i]<<8) + buf[i+1];
-								  		temp_heart = temp_heart >> 1; //need to change to account for the 0.1
-								  		int temp_SpO2 = (buf[i+3]<<8) + buf[i+4];
-								  		temp_heart = temp_heart >> 1; //need to change to account for the 0.1
-								  		int finger_status = buf[i+5];
-								  		if(finger_status == 3)
-                          {
-								  			  ++viable;
-								  			  heart_rate += temp_heart;
-								  			  SpO2 += temp_SpO2;
-								  	      } // end if
-								      } // end for
-								  heart_rate = heart_rate / viable;
-								  SpO2 = SpO2 / viable; //average out our sample value
-
-								  printf("heart: %f, SpO2: %f", heart_rate, SpO2);
-								  } // end else
-	  	  		  } // end else
-	  	  	} // end else
+        HAL_Delay(1000);
+        int error = 0;
+        /*read sensor hub status*/
+        buf[0] = 0x00;
+        buf[1] = 0x00;
+        ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+        if ( ret != HAL_OK ) 
+            {
+            printf("Error sensor write\r\n");
+            error = 1;
+            continue;
+            } 
+        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
+        if(buf[1] != 0x08)
+            {
+            printf("Data bit not ready %x \n", buf[2]);
+            continue;
+            } // end if
+        else if(buf[0] != 0x0)
+            {
+            printf(" %x error \n", buf[1]);
+            continue;
+            } // end if
+        /*read FIFO hub status*/
+        buf[0] = 0x12;
+        buf[1] = 0x00;
+        ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+        if ( ret != HAL_OK ) 
+            {
+            printf("Error algorithm write\r\n");
+            error = 1;
+            continue;
+            } 
+        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
+        int sample_size = buf[1];
+        if(buf[0] != 0x0)
+            {
+            printf(" %x error \n", buf[1]);
+            continue;
+            } // end if
+        /* read the data */
+        buf[0] = 0x12;
+        buf[1] = 0x01;
+        ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+        ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000);
+        if ( ret != HAL_OK ) 
+            {
+            printf("Error algorithm read\r\n");
+            error = 1;
+            continue;
+            } // end if
+        int length_of_data = 1 + 18*sample_size;
+        ret = HAL_I2C_Master_Read(&hi2c1, Read_HM, &buf[0],length_of_data, 5000);
+        //ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000); //checks status
+        if(buf[0] != 0x0)
+            {
+            printf(" %x error \n", buf[1]);
+            continue;
+            } // end if
+        /*this gets us our data for heart_rate and SpO2*/
+        float viable = 0.0; //counts how many viable samples we have
+        for(int i = 13; i < length_of_data; i = i + 18)
+            {
+            int temp_heart = (buf[i]<<8) + buf[i+1];
+            temp_heart = temp_heart >> 1; //need to change to account for the 0.1
+            int temp_SpO2 = (buf[i+3]<<8) + buf[i+4];
+            temp_heart = temp_heart >> 1; //need to change to account for the 0.1
+            int finger_status = buf[i+5];
+            if(finger_status == 3)
+                {
+                ++viable;
+                heart_rate += temp_heart;
+                SpO2 += temp_SpO2;
+                } // end if
+            } // end for
+        heart_rate = heart_rate / viable;
+        SpO2 = SpO2 / viable; //average out our sample value
+        printf("heart: %f, SpO2: %f", heart_rate, SpO2);
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
     } // end while
   /* USER CODE END 3 */

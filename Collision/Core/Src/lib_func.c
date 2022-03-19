@@ -15,7 +15,7 @@ void config_gpio( const char port, const int pin_num, const IO direction )
     // Invariants
     assert( port >= 'A' && port <= 'F' ); 
     assert( pin_num >= 0 && pin_num <= 15 );
-    assert( direction == 0 || direction == 1 );
+    assert( direction == IN || direction == OUT );
 
 
     // Port address differ by 0x400 bytes
@@ -28,10 +28,8 @@ void config_gpio( const char port, const int pin_num, const IO direction )
     io_mode <<= ( pin_num << 1 ); // Shift by 2*pin_num
     mask    <<= ( pin_num << 1 );
 
-    uint32_t *gpio_moder = (uint32_t * )( GPIO_ADDR_BASE + port_offset + GPIO_MODER_OFFSET );
+    uint32_t * const gpio_moder = (uint32_t * )( GPIO_ADDR_BASE + port_offset + GPIO_MODER_OFFSET );
 
     *gpio_moder &= ~mask; // Clear the mode bits
     *gpio_moder |=  io_mode; // Write to it
-    
-    
     } // end config_gpio( )
