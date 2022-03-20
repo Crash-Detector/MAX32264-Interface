@@ -39,6 +39,29 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 enum IO { IN, OUT };
+enum LVL { HIGH_BIT, LOW_BIT };
+
+enum GPIO_MODE
+    {
+    GPIO_INPUT,
+    GPIO_OUTPUT,
+    GPIO_ALT_FUNC,
+    GPIO_ANALOG   // reset mode
+    };
+
+typedef struct GPIO
+    {
+    enum GPIO_MODE pin_mode;
+    uint8_t  pin_num;
+    char        port;
+    } GPIO_t;
+
+/* ----------------------------------------------------------------------------
+ * struct Bio_Data
+ *
+ * Encapsulation of the state for a Bio_data Received.
+ *
+ * -------------------------------------------------------------------------- */
 
 typedef struct Bio_Data
     {
@@ -53,6 +76,7 @@ typedef struct Bio_Data
     uint8_t  reserveOne;  // --
     uint8_t  resserveTwo; // -- Algorithm Mode 2 ^^
     } Bio_Data_t;
+
 
   // Status bytes for when I2C transmission and indicates what the status is for these.
   enum READ_STATUS_BYTE_VALUE
@@ -70,13 +94,21 @@ typedef struct Bio_Data
       ERR_UNKNOWN              = 0xFF
       };
 
-typedef struct GPIO
+/* ----------------------------------------------------------------------------
+ * struct SparkFun_Bio_Sensor
+ *
+ * Encapsulation of the state for the sensor.
+ *
+ * -------------------------------------------------------------------------- */
+typedef struct SparkFun_Bio_Sensor
     {
-    enum IO io_state;
-    uint8_t  pin_num;
-    char        port;
-
-    } GPIO_t;
+    // Internal State
+    GPIO_t _reset_pin;
+    GPIO_t _mfio_pin;
+    uint8_t address;
+    uint8_t _userSelectedMode;
+    uint8_t _sampleRate; // = 100;
+    } SparkFun_Bio_Sensor_t;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -115,6 +147,7 @@ typedef struct GPIO
 #define WRITE_SET_THRESHOLD    0x01 //Index Byte for WRITE_INPUT(0x14)
 #define WRITE_EXTERNAL_TO_FIFO 0x00
 
+#define DEFAULT_sAMPLE_RATE    100
 extern const uint8_t bio_addr_c;
 
 /* USER CODE END EM */
@@ -124,7 +157,24 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void config_gpio( const char port, const int pin_num, const enum IO direction );
+void write_gpio( const char port, const int pin_num, const enum LVL bit_of );
+enum LVL read_gpio( const char port, const int pin_num );
+
 void set_pin_mode( struct GPIO * const gpio, const enum IO direction );
+enum GPIO_MODE read_gpio_state( const char port, const int pin_num );
+enum GPIO_MODE read_gpio_t_state( struct GPIO const * const gpio );
+
+void write_gpio_t( struct GPIO * const gpio, const enum LVL bit_of );
+enum LVL read_gpio_t( struct GPIO const * const gpio );
+
+//------------------------------------------------------------------------------------------------
+//
+//                                 SparkFun_Bio_Sensor Member Function Declarations
+//
+//------------------------------------------------------------------------------------------------
+
+void bio_sensor_init( struct SparkFun_Bio_Sensor * const bio_ssor, const GPIO_t rst_pin, const GPIO_t mfio_pin, const uint8_t sample_rate );
+void write_byte( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, uint8_t write_byte );
 
 /* USER CODE END EFP */
 
