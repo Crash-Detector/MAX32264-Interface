@@ -7,10 +7,12 @@
 #define GPIO_MODER_OFFSET 0x00
 #define GPIO__TYPER_OFFSET 0x04
 
+const uint8_t BIO_ADDRESS = 0x55;
+
 //enum IO { IN, OUT };
 
 // direction 1 (input), direction 0, output
-void config_gpio( const char port, const int pin_num, const IO direction )
+void config_gpio( const char port, const int pin_num, const enum IO direction )
     {
     // Invariants
     assert( port >= 'A' && port <= 'F' ); 
@@ -19,12 +21,12 @@ void config_gpio( const char port, const int pin_num, const IO direction )
 
 
     // Port address differ by 0x400 bytes
-    const uint32_t port_offset = uint32_t ( port - 'A' ) * 0x400;
+    const uint32_t port_offset = ( ( uint32_t ) ( port - 'A' ) ) * 0x400;
 
     uint32_t io_mode = direction == IN ? 0b00 : 0b01;
     uint32_t mask = 0b11;
 
-    // Shift to the pin_num's relevant bits.
+    // Shift to the pin_num's relevant bits9 (in moder register).
     io_mode <<= ( pin_num << 1 ); // Shift by 2*pin_num
     mask    <<= ( pin_num << 1 );
 
@@ -33,3 +35,9 @@ void config_gpio( const char port, const int pin_num, const IO direction )
     *gpio_moder &= ~mask; // Clear the mode bits
     *gpio_moder |=  io_mode; // Write to it
     } // end config_gpio( )
+
+void set_pin_mode( struct GPIO * const gpio, const enum IO direction )
+    {
+    gpio->io_state = direction;
+    config_gpio( gpio->port, gpio->pin_num, direction );
+    } // end set_pin_mode( )

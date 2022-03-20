@@ -38,7 +38,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define Write_HM 0xAA
+#define Read_HM 0xAB
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -56,20 +57,19 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
+//extern enum IO; // { IN, OUT };
+//extern void config_gpio( const char port, const int pin_num,  const enum IO direction );
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
-extern enum IO; // { IN, OUT };
-extern void config_gpio( const char port, const int pin_num,  const IO direction );
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -104,8 +104,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   HAL_StatusTypeDef ret;
   uint8_t buf[65536];
-  #define Write_HM 0xAA
-  #define Read_HM 0xAB
   int samples = 0x0F;
   /*Program the bootloader*/
   //PD0 = RTSN
@@ -239,9 +237,7 @@ int main(void)
                       printf("Error setting page %d : code %x\n", i, buf[0]);
                }
 
-
-
-    }
+    } // end for
 
 
 
@@ -323,15 +319,13 @@ int main(void)
     }
 
 
-
-
   float heart_rate = 0;
   float SpO2 = 0;
 
   while (1)
       {
         HAL_Delay(1000);
-        int error = 0;
+        int error;
         /*read sensor hub status*/
         buf[0] = 0x00;
         buf[1] = 0x00;
@@ -374,7 +368,7 @@ int main(void)
         buf[0] = 0x12;
         buf[1] = 0x01;
         ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-        ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000);
+        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0],2, 5000);
         if ( ret != HAL_OK ) 
             {
             printf("Error algorithm read\r\n");
@@ -382,7 +376,7 @@ int main(void)
             continue;
             } // end if
         int length_of_data = 1 + 18*sample_size;
-        ret = HAL_I2C_Master_Read(&hi2c1, Read_HM, &buf[0],length_of_data, 5000);
+        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0],length_of_data, 5000);
         //ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000); //checks status
         if(buf[0] != 0x0)
             {
