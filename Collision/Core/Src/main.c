@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
+#include "stdlib.h" // For exit( )
 //#include <sys/mman.h>
 /* USER CODE END Includes */
 
@@ -40,6 +41,7 @@
 /* USER CODE BEGIN PM */
 #define Write_HM 0xAA
 #define Read_HM 0xAB
+#define HM_ADDR 0x66 // Without w/r bit.
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -48,6 +50,12 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef hlpuart1;
 
 /* USER CODE BEGIN PV */
+  //PD0 = RTSN
+  //PD1 = MFIO
+//! The mode is arbitrary (this is just here as a const variable)
+static const GPIO_t rst_pin_c  = { GPIO_OUTPUT, 'D', 0 };
+static const GPIO_t mfio_pin_c = { GPIO_OUTPUT, 'D', 1 };
+static const uint8_t def_sample_rate = 100; // 100 Hz
 
 /* USER CODE END PV */
 
@@ -73,7 +81,7 @@ static void MX_LPUART1_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  SparkFun_Bio_Sensor_t sensor;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -82,6 +90,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  // Note this is using a compound literal ( )
+  bio_sensor_init( &sensor, &hi2c1, HM_ADDR, rst_pin_c, mfio_pin_c, def_sample_rate, DISABLE );
 
   /* USER CODE END Init */
 
@@ -106,35 +116,15 @@ int main(void)
   uint8_t buf[65536];
   int samples = 0x0F;
   /*Program the bootloader*/
-  //PD0 = RTSN
-  //PD1 = MFIO
-  //HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1,  0);
- // HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  0);
-  //HAL_Delay(50);
 
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  0);
-  HAL_Delay(6);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1,  0);
-  HAL_Delay(4);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  1);
-  HAL_Delay(50);
+  uint8_t ret_byte = enter_bootloader( &sensor );
+  if( ret_byte != BOOTLOADER_MODE )
+    {
+    printf("Error setting bootloader: code %x\n\r", ret_byte );
+    process_status_byte( ret_byte );
+    exit( 1 );
+    } // end if
 
-
-  //HAL_Delay(1000);
-  buf[0] = 0x01;
-  //buf[1] = 0x08;
-  buf[1] = 0x00;
-  buf[2] = 0x08;
-  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
-  HAL_Delay(2);
-
-  printf("%d HAL bool\n\r", ret == HAL_OK);
-  //if(ret == HAL_OK ){
-  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-  //}
-  if(buf[0] != 0x00 || ret != HAL_OK ){
-    printf("Error setting bootloader: code %x\n\r", buf[0]);
-  }
   unsigned char byteF[254449];
 
   /*
@@ -155,6 +145,8 @@ int main(void)
           printf("\n");
       }
   }*/
+
+  /*
   char buff[65536];
   printf("Testing lol\n\r" );
   HAL_UART_Receive(&hlpuart1, buff, 10, 0xFFFF );
@@ -170,7 +162,7 @@ int main(void)
  	    printf("%s\r", buff);
  	    HAL_Delay( 1000 );
        }
-
+  */
   /*read mode*/
   buf[0] = 0x02;
   buf[1] = 0x00;
@@ -252,27 +244,19 @@ int main(void)
                }
 
     } // end for
-
-
-
-
-
-
-
   //printf("buffer %x\n", byteF[0]);
-//
-//
-//
+
   /*Go into application Mode*/
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  0);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1,  1);
-  HAL_Delay(10);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  1);
-  HAL_Delay(50);
-  HAL_Delay(1000);
-
-
-  config_gpio('D', 1, IN );
+  ret_byte = enter_app_mode( &sensor );
+  if ( ret_byte != APP_MODE )
+      {
+      printf("Error entering app mode: code %x\n\r", ret_byte );
+      process_status_byte( ret_byte );
+      exit( 1 );
+      } // end if
+  
+  set_pin_mode( &sensor._mfio_pin, IN );
+  //config_gpio('D', 1, IN );
   /*set our mode to both raw and algorithm*/
   buf[0] = 0x02;
   buf[1] = 0x00;
@@ -338,9 +322,9 @@ int main(void)
 
   while (1)
       {
-	  	HAL_UART_Receive(&hlpuart1, buff, 10, 0xFFFF );
-	    buff[10] = '\0';
-	    printf("%s\n\r");
+	  	//HAL_UART_Receive(&hlpuart1, buff, 10, 0xFFFF );
+	    //buff[10] = '\0';
+	    //printf("%s\n\r", buff);
         HAL_Delay(1000);
 
         int error;
@@ -404,7 +388,7 @@ int main(void)
         // this gets us our data for heart_rate and SpO2
         float viable = 0.0; //counts how many viable samples we have
         for(int i = 13; i < length_of_data; i = i + 18)
-            {
+        	{
             int temp_heart = (buf[i]<<8) + buf[i+1];
             temp_heart = temp_heart >> 1; //need to change to account for the 0.1
             int temp_SpO2 = (buf[i+3]<<8) + buf[i+4];
