@@ -262,7 +262,7 @@ static uint8_t write_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, 
 
 // This function writes to a buffer (header) the family, index, and all necessary write bytes. 
 // This is to provide an appropriate write buffer in which to utilize for the start of a transaction.
-static void specify_Tx_hder( uint8_t *header, const uint8_t family_byte, const uint8_t index_byte, const uint8_t *w_bytes, const w_bytes_size );
+static void specify_Tx_hder( uint8_t *header, const uint8_t family_byte, const uint8_t index_byte, const uint8_t *w_bytes, const uint32_t w_bytes_size );
 
 // This function uses the given family, index, and write byte to communicate
 // with the MAX32664 which in turn communicates with downward sensors. There
@@ -330,7 +330,7 @@ uint8_t write_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, const u
     const uint8_t write_hm_c = bio_ssor->_addr << 1; // LSB is low to indicate write...
     const uint8_t read_hm_c  = ( bio_ssor->_addr << 1 ) | 1; // LSB is high to indicate read...
 
-    ret = HAL_I2C_Master_Transmit( bio_ssor->_i2c_h, write_hm_c, byte_arr, arr_size, 0xFFFF );
+    ret = HAL_I2C_Master_Transmit( bio_ssor->_i2c_h, write_hm_c, ( uint8_t *) byte_arr, arr_size, 0xFFFF );
     if ( ret != HAL_OK )
         {
         printf( "Issue with specifying index (write transmission)\n\r" );
@@ -351,7 +351,7 @@ uint8_t write_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, const u
     } // end write_bytes_helper( )
 
 // This function handles all possible read transactions 
-static uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size, 
+static uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size,
     uint8_t bytes_read[ ], const uint32_t bytes_to_read );
 
 // This function handles all read commands or stated another way, all information
@@ -382,7 +382,7 @@ uint8_t read_byte_w_write_byte( struct SparkFun_Bio_Sensor const * const bio_sso
     uint8_t  read_buff[ 2 ]; // Placeholder
     uint8_t ret_byte, status_byte;
 
-    status_byte = read_bytes_helper( bio_ssor, buff, sizeof( buff ), buff, sizeof( read_buff ) );
+    status_byte = read_bytes_helper( bio_ssor, buff, sizeof( buff ), read_buff, sizeof( read_buff ) );
 
     if ( status_byte != O2_SUCCESS ) // Success
         return status_byte; // Something went wrong!
@@ -397,7 +397,7 @@ uint8_t read_byte_w_write_byte( struct SparkFun_Bio_Sensor const * const bio_sso
 // retrieves the requested information. An I-squared-C request is then issued,
 // and the information is read. This function is very similar to the one above
 // except it returns multiple requested bytes.
-uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, uint8_t byte_arr[], const size_t arr_size )
+uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t write_byte, uint8_t byte_arr[], const size_t arr_size )
     {
     const uint8_t buff[ 3 ] = { family_byte, index_byte, write_byte };
     uint8_t *read_buff;
@@ -405,7 +405,7 @@ uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, 
     const uint16_t buff_len = 1 + arr_size; // we are going to copy in the buffer into byte_arr
     read_buff = ( uint8_t * ) malloc( buff_len );
 
-    status_byte = read_bytes_helper( bio_ssor, buff, sizeof( buff ), read_buff, arr_size );
+    status_byte = read_bytes_helper( bio_ssor, buff, sizeof( buff ), read_buff, buff_len );
 
     if ( status_byte == O2_SUCCESS ) // Success
         {
@@ -415,7 +415,6 @@ uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, 
             read_buff != read_buff_end; ++read_buff, ++byte_arr )
             *byte_arr = *read_buff;
         } // end if
-    free( buff ); // Avoid memory leaks.
     return status_byte;
     } // end readMultipleBytes( )
 
@@ -423,7 +422,7 @@ uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, 
 // It starts a request by writing the family byte an index byte, and
 // then delays 2 milliseconds, during which the MAX32664 retrieves the requested
 // information. An I-squared-C request is then issued, and an arbitrary amount of bytes are read.
- uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size, 
+ uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size,
         uint8_t bytes_read[ ], const uint32_t bytes_to_read )
     {
     uint8_t status_byte;
@@ -432,7 +431,7 @@ uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, 
     const uint8_t write_hm_c = bio_ssor->_addr << 1; // LSB is low to indicate write...
     const uint8_t read_hm_c  = ( bio_ssor->_addr << 1 ) | 1; // LSB is high to indicate read...
 
-    ret = HAL_I2C_Master_Transmit( bio_ssor->_i2c_h, write_hm_c, header, hdr_size, 0xFFFF );
+    ret = HAL_I2C_Master_Transmit( bio_ssor->_i2c_h, write_hm_c, ( uint8_t * )header, hdr_size, 0xFFFF );
     if ( ret != HAL_OK )
         {
         printf( "Issue with specifying index (read transmission)\n\r" );
@@ -455,7 +454,7 @@ uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, 
 
 // This function writes to a buffer (header) the family, index, and all necessary write bytes. 
 // This is to provide an appropriate write buffer in which to utilize for the start of a transaction.
-void specify_Tx_hder( uint8_t *header, const uint8_t family_byte, const uint8_t index_byte, const uint8_t *w_bytes, const w_bytes_size )
+void specify_Tx_hder( uint8_t *header, const uint8_t family_byte, const uint8_t index_byte, const uint8_t *w_bytes, const uint32_t w_bytes_size )
     {
     *header++ = family_byte;
     *header++ = index_byte;

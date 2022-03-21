@@ -258,7 +258,7 @@ uint8_t read_byte_w_write_byte( struct SparkFun_Bio_Sensor const * const bio_sso
 // retrieves the requested information. An I-squared-C request is then issued,
 // and the information is read. This function is very similar to the one above
 // except it returns multiple requested bytes.
-uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, uint8_t byte_arr[], const size_t arr_size );
+uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t write_byte, uint8_t byte_arr[], const size_t arr_size );
 
 /* USER CODE END EFP */
 
