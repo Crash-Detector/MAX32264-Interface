@@ -41,7 +41,7 @@
 /* USER CODE BEGIN PM */
 #define Write_HM 0xAA
 #define Read_HM 0xAB
-#define HM_ADDR 0x66 // Without w/r bit.
+#define HM_ADDR 0x55 // Without w/r bit.
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/

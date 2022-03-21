@@ -52,8 +52,8 @@ enum GPIO_MODE
 typedef struct GPIO
     {
     enum GPIO_MODE pin_mode;
-    uint8_t  pin_num;
     char        port;
+    uint8_t  pin_num;
     } GPIO_t;
 
 /* ----------------------------------------------------------------------------
@@ -137,7 +137,6 @@ typedef struct SparkFun_Bio_Sensor
     uint8_t _userSelectedMode;
     uint8_t _sampleRate; // = 100;
     } SparkFun_Bio_Sensor_t;
-/* USER CODE END ET */
 
 struct Ssor_version {
   // 3 bytes total
@@ -145,6 +144,8 @@ struct Ssor_version {
   uint8_t minor;
   uint8_t revision;
 };
+
+/* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
@@ -209,19 +210,54 @@ GPIO_PinState read_gpio_t( struct GPIO const * const gpio );
 //
 //------------------------------------------------------------------------------------------------
 
- // Family Byte: READ_DEVICE_MODE (0x02) Index Byte: 0x00, Write Byte: 0x00
-    // The following function initializes the sensor. To place the MAX32664 into
-    // application mode, the MFIO pin must be pulled HIGH while the board is held
-    // in reset for 10ms. After 50 addtional ms have elapsed the board should be
-    // in application mode and will return two bytes, the first 0x00 is a
-    // successful communcation byte, followed by 0x00 which is the byte indicating
-    // which mode the IC is in.
+// Family Byte: READ_DEVICE_MODE (0x02) Index Byte: 0x00, Write Byte: 0x00
+// The following function initializes the sensor. To place the MAX32664 into
+// application mode, the MFIO pin must be pulled HIGH while the board is held
+// in reset for 10ms. After 50 addtional ms have elapsed the board should be
+// in application mode and will return two bytes, the first 0x00 is a
+// successful communcation byte, followed by 0x00 which is the byte indicating
+// which mode the IC is in.
 uint8_t enter_app_mode( struct SparkFun_Bio_Sensor * const bio_ssor );
 
+// Family Byte: READ_DEVICE_MODE (0x02) Index Byte: 0x00, Write Byte: 0x00
+// The following function puts the MAX32664 into bootloader mode. To place the MAX32664 into
+// bootloader mode, the MFIO pin must be pulled LOW while the board is held
+// in reset for 10ms. After 50 addtional ms have elapsed the board should be
+// in bootloader mode and will return two bytes, the first 0x00 is a
+// successful communcation byte, followed by 0x08 which is the byte indicating
+// that the board is in bootloader mode.
 uint8_t enter_bootloader( struct SparkFun_Bio_Sensor * const bio_ssor );
+
+// This function initiates the bio_ssor structure (filling it with arguments passed)
+// as well as putting the sensor into a particular mode (as specified)
 void bio_sensor_init( struct SparkFun_Bio_Sensor * const bio_ssor, I2C_HandleTypeDef *const i2c_h, const uint8_t addr, const GPIO_t rst_pin, const GPIO_t mfio_pin, const uint8_t sample_rate, const uint8_t user_sel_mode );
-uint8_t write_byte( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, uint8_t write_byte );
+
+uint8_t write_byte( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t write_byte );
+uint8_t write_2_bytes( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t write_byte, const uint8_t write_byte_2 );
+
+// This function is the same as the function above and uses the given family,
+// index, and write byte, but also takes a 16 bit integer as a paramter to communicate
+// with the MAX32664 which in turn communicates with downward sensors. There
+// are two steps demonstrated in this function. First a write to the MCU
+// indicating what you want to do, a delay, and then a read to confirm positive
+// transmission.
+uint8_t write_byte_and_16b_int( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t write_byte, const uint16_t val_16_bit );
+uint8_t write_bytes_arb( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t byte_arr[ ], const uint32_t arr_size );
+
 uint8_t read_byte( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte );
+
+// This is similar to read_byte but also allows for a write byte to be passed as an argument. 
+// This is added just in case it's needed. It starts a request by writing the family, index, 
+// and write byte to the MAX32664 and reads the data that returns.
+uint8_t read_byte_w_write_byte( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, const uint8_t write_byte );
+
+// This function handles all read commands or stated another way, all information
+// requests. It starts a request by writing the family byte, an index byte, and
+// a write byte and then then delays 60 microseconds, during which the MAX32664
+// retrieves the requested information. An I-squared-C request is then issued,
+// and the information is read. This function is very similar to the one above
+// except it returns multiple requested bytes.
+uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, uint8_t byte_arr[], const size_t arr_size );
 
 /* USER CODE END EFP */
 
