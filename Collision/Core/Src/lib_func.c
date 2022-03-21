@@ -186,8 +186,16 @@ uint8_t enter_app_mode( struct SparkFun_Bio_Sensor * const bio_ssor )
     HAL_Delay(1000);
     */
     uint8_t resp_byte = read_byte( bio_ssor, READ_DEVICE_MODE, 0x00 );
-    return resp_byte; // Should be in app_mode
+    return resp_byte; // Should be in app_mode ( 0x00 )
     } // end enter_app_mode( )
+
+// Family Byte: READ_DEVICE_MODE (0x02) Index Byte: 0x00, Write Byte: 0x00
+// The following function puts the MAX32664 into bootloader mode. To place the MAX32664 into
+// bootloader mode, the MFIO pin must be pulled LOW while the board is held
+// in reset for 10ms. After 50 addtional ms have elapsed the board should be
+// in bootloader mode and will return two bytes, the first 0x00 is a
+// successful communcation byte, followed by 0x08 which is the byte indicating
+// that the board is in bootloader mode.
 uint8_t enter_bootloader( struct SparkFun_Bio_Sensor * const bio_ssor )
     {
     
@@ -247,16 +255,14 @@ uint8_t enter_bootloader( struct SparkFun_Bio_Sensor * const bio_ssor )
     } // end enter_bootloader( )
 
 
-// Family Byte: READ_DEVICE_MODE (0x02) Index Byte: 0x00, Write Byte: 0x00
-// The following function puts the MAX32664 into bootloader mode. To place the MAX32664 into
-// bootloader mode, the MFIO pin must be pulled LOW while the board is held
-// in reset for 10ms. After 50 addtional ms have elapsed the board should be
-// in bootloader mode and will return two bytes, the first 0x00 is a
-// successful communcation byte, followed by 0x08 which is the byte indicating
-// that the board is in bootloader mode.
+// This function uses the given family, index, and write byte to communicate
+// with the MAX32664 which in turn communicates with downward sensors. There
+// are two steps demonstrated in this function. First a write to the MCU
+// indicating what you want to do, a delay, and then a read to confirm positive
+// transmission.
 uint8_t write_byte( struct SparkFun_Bio_Sensor * const bio_ssor, const uint8_t family_byte, const uint8_t index_byte, uint8_t write_byte )
     {
-    uint8_t buff[ 3 ] = { family_byte, index_byte, write_byte };
+    const uint8_t buff[ 3 ] = { family_byte, index_byte, write_byte };
     uint8_t status_byte;
     HAL_StatusTypeDef ret;
 
