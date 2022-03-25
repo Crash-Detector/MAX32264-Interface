@@ -115,6 +115,11 @@ int main(void)
   HAL_StatusTypeDef ret;
   uint8_t buf[65536];
   int samples = 0x0F;
+  printf( "Size of algorithm array: %d\n\r", algo_arr_size );
+  for ( uint8_t const * ptr = algo_arr_ptr; ptr != algo_arr_ptr + algo_arr_size; ++ptr )
+      {
+	  printf( "Byte %d: %d\n\r", ptr - algo_arr_ptr, *ptr );
+      }
   /*Program the bootloader*/
 
   uint8_t ret_byte = enter_bootloader( &sensor );

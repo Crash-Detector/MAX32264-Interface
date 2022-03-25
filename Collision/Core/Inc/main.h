@@ -185,7 +185,8 @@ struct Ssor_version {
 
 #define DEFAULT_sAMPLE_RATE    100
 extern const uint8_t bio_addr_c;
-extern const uint8_t algo_arr[];
+extern const uint8_t const * const algo_arr_ptr;
+extern const size_t algo_arr_size;
 
 /* USER CODE END EM */
 

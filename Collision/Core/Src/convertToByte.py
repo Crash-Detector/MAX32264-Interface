@@ -4,7 +4,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 byte_arr = np.fromfile( "algorithm.msbl", dtype=np.uint8)
 
-f_w = open( "algo_as_bytes.txt", 'w' )
+f_w = open( "algo_as_bytes_1.txt", 'w' )
 
 print( byte_arr.size )
 #print( byte_arr )

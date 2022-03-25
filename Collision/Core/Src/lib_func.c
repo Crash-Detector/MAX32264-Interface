@@ -351,9 +351,11 @@ uint8_t write_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, const u
     } // end write_bytes_helper( )
 
 // This function handles all possible read transactions 
-static uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size,
-    uint8_t bytes_read[ ], const uint32_t bytes_to_read );
+//static uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size,
+//    uint8_t bytes_read[ ], const uint32_t bytes_to_read );
 
+static uint8_t read_bytes_helper( struct SparkFun_Bio_Sensor const * const bio_ssor, const uint8_t header[ ], const uint32_t hdr_size,
+        uint8_t bytes_read[ ], const uint32_t bytes_to_read );
 // This function handles all read commands or stated another way, all information
 // requests. It starts a request by writing the family byte an index byte, and
 // then delays 2 milliseconds, during which the MAX32664 retrieves the requested
@@ -411,10 +413,14 @@ uint8_t read_multiple_bytes( struct SparkFun_Bio_Sensor const * const bio_ssor, 
         {
         // Copy into byte_arr
         ++read_buff;
-        for ( uint8_t const * const read_buff_end = read_buff + buff_len; 
-            read_buff != read_buff_end; ++read_buff, ++byte_arr )
-            *byte_arr = *read_buff;
+        uint8_t const * const read_buff_end = read_buff + buff_len;
+        for ( uint8_t const * read_buff_ptr = read_buff;
+        	  read_buff_ptr != read_buff_end; ++read_buff_ptr, ++byte_arr )
+            {
+            *byte_arr = *read_buff_ptr;
+            } // end for
         } // end if
+    free( read_buff );
     return status_byte;
     } // end readMultipleBytes( )
 
@@ -506,3 +512,4 @@ void process_status_byte( const enum READ_STATUS_BYTE_VALUE status_byte )
         exit( 1 );
     } // end switch
     } // end process_status_byte( )
+
