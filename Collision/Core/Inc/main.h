@@ -192,7 +192,6 @@ extern const size_t algo_arr_size;
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
-void process_status_byte( const enum READ_STATUS_BYTE_VALUE status_byte );
 
 /* USER CODE BEGIN EFP */
 void config_gpio( const char port, const int pin_num, const enum IO direction );

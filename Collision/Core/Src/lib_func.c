@@ -168,8 +168,8 @@ uint8_t enter_app_mode( struct SparkFun_Bio_Sensor * const bio_ssor )
     set_pin_mode( &( bio_ssor->_reset_pin ), OUT );
     set_pin_mode( &( bio_ssor->_mfio_pin ),  OUT );
 
-    write_gpio_t( &bio_ssor->_mfio_pin , GPIO_PIN_SET );
     write_gpio_t( &bio_ssor->_reset_pin, GPIO_PIN_RESET );
+    write_gpio_t( &bio_ssor->_mfio_pin , GPIO_PIN_SET );
     HAL_Delay( 10 ); // Hold reset for 10ms.
 
     write_gpio_t( &bio_ssor->_reset_pin, GPIO_PIN_SET );
@@ -328,7 +328,7 @@ uint8_t write_bytes_helper( struct SparkFun_Bio_Sensor * const bio_ssor, const u
     HAL_StatusTypeDef ret;
 
     const uint8_t write_hm_c = bio_ssor->_addr << 1; // LSB is low to indicate write...
-    const uint8_t read_hm_c  = ( bio_ssor->_addr << 1 ) | 1; // LSB is high to indicate read...
+    const uint8_t read_hm_c  = ( bio_ssor->_addr << 1 ) + 1; // LSB is high to indicate read...
 
     ret = HAL_I2C_Master_Transmit( bio_ssor->_i2c_h, write_hm_c, ( uint8_t *) byte_arr, arr_size, 0xFFFF );
     if ( ret != HAL_OK )

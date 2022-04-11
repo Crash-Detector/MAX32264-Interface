@@ -20,7 +20,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
@@ -65,6 +64,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_LPUART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
+
 //extern enum IO; // { IN, OUT };
 //extern void config_gpio( const char port, const int pin_num,  const enum IO direction );
 
@@ -114,14 +114,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   HAL_StatusTypeDef ret;
   uint8_t buf[65536];
-  int samples = 0x0F;
-  printf( "Size of algorithm array: %d\n\r", algo_arr_size );
+  int samples = 0x1;
+  /*printf( "Size of algorithm array: %d\n\r", algo_arr_size );
   for ( uint8_t const * ptr = algo_arr_ptr; ptr != algo_arr_ptr + algo_arr_size; ++ptr )
       {
 	  printf( "Byte %d: %d\n\r", ptr - algo_arr_ptr, *ptr );
       }
-  /*Program the bootloader*/
+	*/
 
+  /*Program the bootloader*/
+  uint8_t ret_byte;
+/*
   uint8_t ret_byte = enter_bootloader( &sensor );
   if( ret_byte != BOOTLOADER_MODE )
     {
@@ -129,175 +132,255 @@ int main(void)
     process_status_byte( ret_byte );
     exit( 1 );
     } // end if
+*/
+//  	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  0);
+//      HAL_Delay(6);
+//      HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1,  0);
+//      HAL_Delay(4);
+//      HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  1);
+//      HAL_Delay(50);
+//
+//
+//      //HAL_Delay(1000);
+//      buf[0] = 0x01; //
+//      //buf[1] = 0x08;
+//      buf[1] = 0x00;
+//      buf[2] = 0x08;
+//      ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
+//      HAL_Delay(6);
+//
+//      printf("%d HAL bool\n\r", ret == HAL_OK);
+//      ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+//      if(buf[0] != 0x00 || ret != HAL_OK ){
+//          printf("Error setting bootloader: code %x\n\r", buf[0]);
+//      }
+//
+//
+//
+//  /*read mode*/
+//  buf[0] = 0x02;
+//  buf[1] = 0x00;
+//  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+//  HAL_Delay(6);
+//  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
+//  printf("error code: %x application mode: %x\n\r", buf[0],buf[1]);
+//
+//  buf[0] = 0x81; //
+//        //buf[1] = 0x08;
+//  buf[1] = 0x01;
+//  //buf[2] = 0x08;
+//  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+//  HAL_Delay(6);
+//
+//        printf("%d HAL bool\n\r", ret == HAL_OK);
+//        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 3, 5000);
+//        if(buf[0] != 0x00 || ret != HAL_OK ){
+//            printf("Error setting bootloader: code %x\n\r", buf[0]);
+//        }
+//   int page_size = ((buf[1]<<8) + buf[2]) + 16;
+//
+//
+//
+//
+//  /*setting page number*/
+//  uint8_t page_count = *(algo_arr_ptr + 0x44);
+//  printf("page_size %d\n", page_size);
+//
+//  buf[0] = 0x80;
+//  buf[1] = 0x02;
+//  buf[2] = 0x00;
+//  buf[3] = page_count;
+//
+//  printf("%x pages\n\r", page_count);
+//  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 4, 5000);
+//  HAL_Delay(6);
+//  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+//  if(buf[0] != 0x00 || ret != HAL_OK ){
+//          printf("Error setting page num: code %x\n\r", buf[0]);
+//   }
+//  printf("page set\n");
+//
+//  /*initialization vector*/
+//  int byte_count = 0x32-0x28 + 1;
+//  //printf("byte count: %d", byte_count);
+//
+//  buf[0] = 0x80;
+//  buf[1] = 0x00;
+//  for(int i = 0; i < byte_count; ++i){
+//      buf[2+i] = *(algo_arr_ptr + 0x28 + i);//byteF[0x28+i];
+//      //printf("%d ",*(algo_arr_ptr + 0x28 + i));
+//  }
+//  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
+//  HAL_Delay(6);
+//  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+//  if(buf[0] != 0x00 || ret != HAL_OK ){
+//          printf("Error setting init vec: code %x\n\r", buf[0]);
+//   }
+//  printf("init vec set\n");
+///*authentication bytes*/
+//  byte_count = 0x43-0x34 + 1;
+//      buf[0] = 0x80;
+//    buf[1] = 0x01;
+//    for(int i = 0; i < byte_count; ++i){
+//      buf[2+i] = *(algo_arr_ptr + 0x34 + i);//byteF[0x34+i];
+//      //printf("%d ",*(algo_arr_ptr + 0x34 + i));
+//    }
+//    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
+//    HAL_Delay(6);
+//    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+//    if(buf[0] != 0x00 || ret != HAL_OK ){
+//              printf("Error setting auth vec: code %x\n\r", buf[0]);
+//       }
+//    printf("auth vec set\n");
+//
+//    /*erase application*/
+//
+//    buf[0] = 0x80;
+//    buf[1] = 0x03;
+//    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+//    HAL_Delay(1400);
+//    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+//    if(buf[0] != 0x00 || ret != HAL_OK ){
+//              printf("Error setting page num: code %x\n\r", buf[0]);
+//       }
+//    printf("application erased\n");
+//    int current = 0x4c;
+//
+//    for(int i = 0; i < page_count; ++i){
+//        int count = 2;
+//        buf[0] = 0x80;
+//        buf[1] = 0x04;
+//        for(int j = current; j < (current + page_size); ++j){
+//            buf[count] = *(algo_arr_ptr + j);//byteF[j];
+//            ++count;
+//
+//        }
+//        current = current + (page_size);
+//
+//        ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], count, 5000);
+//        HAL_Delay(340);
+//        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+//        printf("page %d uploaded\n", i);
+//        if(buf[0] != 0x00 || ret != HAL_OK ){
+//                      printf("Error setting page %d : code %x\n\r", i, buf[0]);
+//               }
+//
+//    }
+//
+//
+//    // end for
+//  //printf("buffer %x\n", byteF[0]);
+//    printf("All pages uploaded\n");
 
-  unsigned char byteF[254449];
-
-  /*
-  FILE *ptr;
-
-  ptr = fopen("thealgo.bin","rb");  // r for read, b for binary
-  if (!ptr)
-     {
-         printf("Error in reading file. Abort.\n");
-         //return -3;
-     }
-  unsigned char byteF[254449];
-  fread(&byteF,sizeof(byteF),1,ptr); // read 213408 bytes to our buffer
-
-  for( int i = 0; i < 0x45; ++i){
-      printf("%x ", byteF[i]);
-      if(i%15){
-          printf("\n");
-      }
-  }*/
-
-  /*
-  char buff[65536];
-  printf("Testing lol\n\r" );
-  HAL_UART_Receive(&hlpuart1, buff, 10, 0xFFFF );
-  buff[10] = '\0';
-  //scanf( "%1s", buff);
-  printf( "%s\n\r", buff);
-
-  while (1)
-       {
-	    printf("In loop\n\r");
- 	  	HAL_UART_Receive(&hlpuart1, buff, 10, 0xFFFF );
- 	    buff[10] = '\0';
- 	    printf("%s\r", buff);
- 	    HAL_Delay( 1000 );
-       }
-  */
-  /*read mode*/
-  buf[0] = 0x02;
-  buf[1] = 0x00;
-  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-  HAL_Delay(2);
-  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
-  printf("error code: %x application mode: %x\n\r", buf[0],buf[1]);
 
 
-  /*setting page number*/
-  uint8_t page_count = byteF[0x44];
-  int page_size = 8192 + 16;
-  buf[0] = 0x80;
-  buf[1] = 0x02;
-  buf[2] = 0x00;
-  buf[3] = byteF[0x44];
 
-  printf("%x pages\n\r", byteF[0x44]);
-  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 4, 5000);
-  HAL_Delay(2);
-  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-  if(buf[0] != 0x00 || ret != HAL_OK ){
-          printf("Error setting page num: code %x\n\r", buf[0]);
-   }
 
-  /*initialization vector*/
-  int byte_count = 0x32-0x28;
-  buf[0] = 0x80;
-  buf[1] = 0x00;
-  for(int i = 0; i < byte_count; ++i){
-      buf[2+i] = byteF[0x28+i];
-  }
-  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
-  HAL_Delay(2);
-  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-  if(buf[0] != 0x00 || ret != HAL_OK ){
-          printf("Error setting page num: code %x\n\r", buf[0]);
-   }
-/*authentication bytes*/
-  byte_count = 0x43-0x34;
-    buf[0] = 0x80;
-    buf[1] = 0x01;
-    for(int i = 0; i < byte_count; ++i){
-      buf[2+i] = byteF[0x34+i];
-    }
-    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + byte_count, 5000);
-    HAL_Delay(2);
-    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-    if(buf[0] != 0x00 || ret != HAL_OK ){
-              printf("Error setting page num: code %x\n\r", buf[0]);
-       }
-
-    /*erase application*/
-
-    buf[0] = 0x80;
-    buf[1] = 0x03;
-    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-    HAL_Delay(1400);
-    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-    if(buf[0] != 0x00 || ret != HAL_OK ){
-              printf("Error setting page num: code %x\n\r", buf[0]);
-       }
-    int current = 0x4c;
-    for(int i = 0; i < page_count; ++i){
-        int count = 2;
-        buf[0] = 0x8;
-        buf[1] = 0x04;
-        for(int j = current; j < (current + page_size); ++j){
-            buf[count] = byteF[j];
-            ++count;
-        }
-        current = current + page_size;
-
-        ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2 + page_size, 5000);
-        HAL_Delay(340);
-        ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
-        if(buf[0] != 0x00 || ret != HAL_OK ){
-                      printf("Error setting page %d : code %x\n\r", i, buf[0]);
-               }
-
-    } // end for
-  //printf("buffer %x\n", byteF[0]);
 
   /*Go into application Mode*/
-  ret_byte = enter_app_mode( &sensor );
-  if ( ret_byte != APP_MODE )
-      {
-      printf("Error entering app mode: code %x\n\r", ret_byte );
-      process_status_byte( ret_byte );
-      exit( 1 );
-      } // end if
-  
+
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  0); // Reset pin
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1,  1); // MFIO pin
+        HAL_Delay(10);
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0,  1); // Reset is pulled
+        HAL_Delay(50);
+        HAL_Delay(1000);
+
+        buf[0] = 0x02;
+          buf[1] = 0x00;
+          ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+          HAL_Delay(6);
+          ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
+          printf("error code: %x application mode: %x\n\r", buf[0],buf[1]);
+
+
+
   set_pin_mode( &sensor._mfio_pin, IN );
-  //config_gpio('D', 1, IN );
-  /*set our mode to both raw and algorithm*/
-  buf[0] = 0x02;
-  buf[1] = 0x00;
-  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-  HAL_Delay(2);
-  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
-  printf("error code: %x mode: %x\nr", buf[0],buf[1]);
+/*
+  	  buf[0] = 0x50;
+  	  buf[1] = 0x02; //says 02 in another place
+  	buf[2] = 0x0B;
 
-  buf[0] = 0xFF;
-  buf[1] = 0x03;
-  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-  HAL_Delay(2);
-  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 5, 5000);
-  printf("error code: %x mode: %x %x %x %x\n\r", buf[0],buf[1], buf[2], buf[3],buf[4]);
+  	//A
+  	buf[3] = 0x00;
+  	buf[4] = 0x02;
+  	buf[5] = 0x6F;
+  	buf[6] = 0x60;
+
+  	//B
+  	buf[7] = 0xFF;
+  	buf[8] = 0xCB;
+  	buf[9] = 0x1D;
+  	buf[10] = 0x12;
+
+  	//C
+	buf[11] = 0x00;
+	buf[12] = 0xAB;
+	buf[13] = 0xF3;
+	buf[14] = 0x7B;
+
+	ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 15, 5000);
+	  HAL_Delay(20);
+	  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+	  if(buf[0] != 0x00 || ret != HAL_OK ){
+	      printf("Error setting mode: code %x\n\r", buf[0]);
+	  }
+	printf("Callibrated SpO2!\n");
+*/
+
+//
+//  buf[0] = 0x02;
+//  buf[1] = 0x00;
+//  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+//  HAL_Delay(6);
+//  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
+//  printf("error code: %x mode: %x\nr", buf[0],buf[1]);
+//
+//  /*read version*/
+//  buf[0] = 0xFF;
+//  buf[1] = 0x03;
+//  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+//  HAL_Delay(6);
+//  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 5, 5000);
+//  printf("error code: %x mode: %x %x %x %x\n\r", buf[0],buf[1], buf[2], buf[3],buf[4]);
 
 
+  /*set our mode to MODE 1*/
   buf[0] = 0x10;
   buf[1] = 0x00;
-  buf[2] = 0x03;
+  buf[2] = 0x02;
   ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
-  HAL_Delay(2);
+  HAL_Delay(6);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
   if(buf[0] != 0x00 || ret != HAL_OK ){
       printf("Error setting mode: code %x\n\r", buf[0]);
   }
+  printf("mode set to raw and algo\n");
 
   /*Set FIFO threshold as almost full at 0x0F*/
   buf[0] = 0x10;
   buf[1] = 0x01;
   buf[2] = samples;
   ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
-  HAL_Delay(2);
+  HAL_Delay(6);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
     if(buf[0] != 0x00 || ret != HAL_OK ){
       printf("Error setting FIFO threshold code: %x\n\r", buf[0]);
     }
+  printf("fifo set\n");
+
+  /*enable AGC*/
+  buf[0] = 0x52;
+    buf[1] = 0x00;
+    buf[2] = 0x01;
+    ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
+    HAL_Delay(25);
+    ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+      if(buf[0] != 0x00 || ret != HAL_OK ){
+        printf("Error Enabling Algorithm code: %x\n\r", buf[0]);
+      }
+     printf("enable AGC \n");
+
 
 
   /*Enable the sensor*/
@@ -305,26 +388,74 @@ int main(void)
   buf[1] = 0x03;
   buf[2] = 0x01;
   ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
-  HAL_Delay(40);
+  HAL_Delay(45);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
     if(buf[0] != 0x00 || ret != HAL_OK ){
       printf("Error enabling sensor code: %x\n\r", buf[0]);
     }
+    printf("sensor set\n");
+
+
   /*Enable the algorithm*/
+
+    HAL_Delay(500);
   buf[0] = 0x52;
   buf[1] = 0x02;
   buf[2] = 0x01;
   ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 3, 5000);
-  HAL_Delay(40);
+  HAL_Delay(45);
   ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 1, 5000);
+
     if(buf[0] != 0x00 || ret != HAL_OK ){
       printf("Error Enabling Algorithm code: %x\n\r", buf[0]);
     }
+    printf("enable algorithm \n");
 
 
   float heart_rate = 0;
   float SpO2 = 0;
 
+  HAL_Delay(1000);
+
+  while(1){
+
+	  //family: 0x12
+	  //index: 0x01
+	  //MAXFAST_ARRAY_SIZE: 10
+
+	  buf[0] = 0x12;
+	  buf[1] = 0x01;
+
+	  ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
+	  HAL_Delay(6);
+	  ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 10, 5000);
+	  printf("code: %d ", buf[0]);
+	  int heartRate = ((buf[1]) << 8);
+	  printf("%d %d %d\n", buf[1], buf[2], buf[3]);
+	  heartRate |= (buf[2]);
+	  heartRate = heartRate/10;
+
+	      // Confidence formatting
+	  int confidence = buf[3];
+
+	      //Blood oxygen level formatting
+	   float oxygen = (buf[4]) << 8;
+	   oxygen += buf[5];
+	   oxygen = oxygen/10.0;
+
+	      //"Machine State" - has a finger been detected?
+	   int status = buf[6];
+
+	   printf("heart rate: %d ", heartRate);
+	   printf("confidence: %d ", confidence);
+	   printf("oxygen: %f ", oxygen);
+	   printf("status: %d\n\n", status);
+	   HAL_Delay(250);
+
+
+
+  }
+  /*
   while (1)
       {
 	  	//HAL_UART_Receive(&hlpuart1, buff, 10, 0xFFFF );
@@ -332,18 +463,15 @@ int main(void)
 	    //printf("%s\n\r", buff);
         HAL_Delay(1000);
 
-        int error;
+        int error = 0;
         // read sensor hub status
         buf[0] = 0x00;
         buf[1] = 0x00;
         ret = HAL_I2C_Master_Transmit(&hi2c1, Write_HM, &buf[0], 2, 5000);
-        if ( ret != HAL_OK ) 
-            {
-            printf("Error sensor write\\n\r");
-            error = 1;
-            continue;
-            } 
+        HAL_Delay(6);
         ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
+
+
         if(buf[1] != 0x08)
             {
             printf("Data bit not ready %x \n\r", buf[2]);
@@ -354,6 +482,14 @@ int main(void)
             printf(" %x error \n\r", buf[1]);
             continue;
             } // end if
+
+        printf("Data bit: %x, ", buf[1]);
+        if ( ret != HAL_OK )
+                    {
+                    printf("Error sensor write %x \n\r", buf[0]);
+                    error = 1;
+                    continue;
+                    }
         // read FIFO hub status
         buf[0] = 0x12;
         buf[1] = 0x00;
@@ -366,6 +502,7 @@ int main(void)
             } 
         ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0], 2, 5000);
         int sample_size = buf[1];
+        printf("sample size: %d\n", sample_size);
         if(buf[0] != 0x0)
             {
             printf(" %x error \n\r", buf[1]);
@@ -382,6 +519,7 @@ int main(void)
             error = 1;
             continue;
             } // end if
+
         int length_of_data = 1 + 18*sample_size;
         ret = HAL_I2C_Master_Receive(&hi2c1, Read_HM, &buf[0],length_of_data, 5000);
         //ret = HAL_I2C_Master_Recieve(&hi2c1, Read_HM, &buf[0],2, 5000); //checks status
@@ -410,10 +548,11 @@ int main(void)
         SpO2 = SpO2 / viable; //average out our sample value
 
         printf("heart: %f, SpO2: %f\n\r", heart_rate, SpO2);
-
+*/
     /* USER CODE END WHILE */
+
     /* USER CODE BEGIN 3 */
-    } // end while
+    //} // end while
   /* USER CODE END 3 */
 }
 
